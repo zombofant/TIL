@@ -8,8 +8,12 @@ Transition = collections.namedtuple("Transition", ["wchar", "move_head",
 
 
 class Tape(collections.defaultdict):
-    def __init__(self, blank, loglevel=logging.WARNING):
+    def __init__(self, data, blank, loglevel=logging.WARNING):
         super().__init__(lambda: blank)
+
+        for i in range(len(data)):
+            self[i] = data[i]
+
         self.pos = 0
         self.blank = blank
 
@@ -63,10 +67,7 @@ class TuringMachine:
     def __init__(self, tape, transitions, initial_state, accepting_states,
                  blank="b̸", outputs=1, loglevel=logging.WARNING):
 
-        self.tape = Tape(blank, loglevel=loglevel)
-
-        for i in range(len(tape)):
-            self.tape[i] = tape[i]
+        self.tape = Tape(tape, blank=blank, loglevel=loglevel)
 
         self._state = None
         self.states = set()
@@ -81,7 +82,6 @@ class TuringMachine:
                 new_state)
 
         self.outputs = outputs
-        self.blank = blank
 
         logging.basicConfig(format='[{name}] [{levelname}] {message}', style="{",
                             level=loglevel)
