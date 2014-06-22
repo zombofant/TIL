@@ -55,7 +55,7 @@ class TuringMachine:
                     return ret
             else:
                 ret[-1] += self.tape[self.pos]
-            
+
             pos += 1
 
     @property
@@ -99,5 +99,3 @@ pprint.pprint(machine.transitions)
 print("running machine")
 machine.run()
 print(machine.output())
-
-
