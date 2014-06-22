@@ -11,6 +11,9 @@ class Tape(collections.defaultdict):
     def __init__(self, data, blank, loglevel=logging.WARNING):
         super().__init__(lambda: blank)
 
+        if not data:
+            data = [blank]
+
         for i in range(len(data)):
             self[i] = data[i]
 
