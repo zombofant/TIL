@@ -50,6 +50,7 @@ class TuringMachine:
             if self.tape[pos] == self.blank:
                 if blanks_left:
                     ret.append("")
+                    blanks_left -= 1
                 else:
                     return ret
             else:
