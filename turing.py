@@ -15,7 +15,7 @@ class Tape(collections.defaultdict):
 
     def __str__(self):
         ret = ""
-        for k in sorted(self):
+        for k in range(min(self), max(self)):
             if k == self.pos:
                 ret += "[{}]".format(str(self[k]))
             else:
