@@ -64,9 +64,7 @@ class TuringMachine:
 
     @state.setter
     def state(self, value):
-        if value not in self.states:
-            self.states.add(value)
-
+        self.states.add(value)
         self._state = value
 
 
