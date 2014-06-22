@@ -17,8 +17,8 @@ class Tape(collections.defaultdict):
         self.pos = 0
         self.blank = blank
 
-        logging.basicConfig(format='[{name}] [{levelname}] {message}', style="{",
-                            level=loglevel)
+        logging.basicConfig(format='[{name}] [{levelname}] {message}',
+                            style="{", level=loglevel)
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
@@ -83,8 +83,8 @@ class TuringMachine:
 
         self.outputs = outputs
 
-        logging.basicConfig(format='[{name}] [{levelname}] {message}', style="{",
-                            level=loglevel)
+        logging.basicConfig(format='[{name}] [{levelname}] {message}',
+                            style="{", level=loglevel)
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
@@ -102,12 +102,13 @@ class TuringMachine:
         try:
             transition = self.transitions[self.state][self.tape.read()]
         except KeyError:
-            raise ValueError("no transition found from current state") from None
+            raise ValueError("no transition found from current state") \
+                from None
 
         self.tape.write(transition.wchar)
         self.state = transition.new_state
         self.tape.move(transition.move_head)
-        
+
         self.logger.info("step done. current state: {} {}".format(
             self.state, self.tape))
 
