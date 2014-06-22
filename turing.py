@@ -19,8 +19,10 @@ class Tape(collections.defaultdict):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def __str__(self):
+        upper = max(max(self), self.pos)
+        lower = min(min(self), self.pos)
         ret = ""
-        for k in range(min(self), max(self)+1):
+        for k in range(lower, upper+1):
             if k == self.pos:
                 ret += "[{}]".format(str(self[k]))
             else:
