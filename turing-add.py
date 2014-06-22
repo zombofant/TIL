@@ -4,9 +4,22 @@ from turing import TuringMachine
 import logging
 import argparse
 
+def pos_int(val):
+    try:
+        val = int(val)
+    except ValueError:
+        raise argparse.ArgumentTypeError("positive integer required") from None
+
+    if val < 0:
+        raise argparse.ArgumentTypeError("positive integer required")
+
+    return val
+
+    
+
 parser = argparse.ArgumentParser()
-parser.add_argument("a", type=int)
-parser.add_argument("b", type=int)
+parser.add_argument("a", type=pos_int)
+parser.add_argument("b", type=pos_int)
 parser.add_argument("-v", "--verbosity", action="count",
                     help="Increase verbosity")
 
