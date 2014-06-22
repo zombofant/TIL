@@ -2,6 +2,19 @@
 
 from turing import TuringMachine
 import logging
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("a", type=int)
+parser.add_argument("b", type=int)
+parser.add_argument("-v", "--verbosity", action="count",
+                    help="Increase verbosity")
+
+args = parser.parse_args()
+loglevel = {0: logging.WARNING,
+            1: logging.INFO,
+            2: logging.DEBUG}.get(args.verbosity)
+
 
 a = "a"
 q0 = "q₀"
@@ -13,7 +26,7 @@ q5 = "q₅"
 qf = "qf"
 blank = "b̸"
 
-tape = [a, a, blank, a]
+tape = [a] * args.a + [blank] + [a] * args.b
 
 transitions = {(q0, a, a, 1, q0),
                (q0, blank, blank, 1, q1),
@@ -27,6 +40,7 @@ transitions = {(q0, a, a, 1, q0),
                (q5, a, a, -1, q5),
                (q5, blank, blank, 1, qf)}
 
-machine = TuringMachine(tape, transitions, q0, {qf}, loglevel=logging.DEBUG)
+machine = TuringMachine(tape, transitions, q0, {qf}, loglevel=loglevel)
 machine.run()
-print(machine.output())
+output = machine.output()
+print(len(output[0]))
