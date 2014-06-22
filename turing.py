@@ -24,11 +24,11 @@ class TuringMachine:
         self.accepting_states = accepting_states
 
         self.transitions = dict()
-        for trans in transitions:
-            if trans[0] not in self.transitions:
-                self.transitions[trans[0]] = dict()
-
-            self.transitions[trans[0]][trans[1]] = Transition(*trans[2:])
+        for state, rchar, wchar, move_head, new_state in transitions:
+            self.transitions.setdefault(state, {})[rchar] = Transition(
+                wchar,
+                move_head,
+                new_state)
 
         self.outputs = outputs
         self.blank = blank
