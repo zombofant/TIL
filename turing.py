@@ -96,10 +96,14 @@ class TuringMachine:
         while self.state not in self.accepting_states:
             self.step()
 
-        self.logger.info("machine stopped")
+        self.logger.info("machine stopped in state {}".format(self.state))
 
     def step(self):
-        transition = self.transitions[self.state][self.tape.read()]
+        try:
+            transition = self.transitions[self.state][self.tape.read()]
+        except KeyError:
+            raise ValueError("no transition found from current state") from None
+
         self.tape.write(transition.wchar)
         self.state = transition.new_state
         self.tape.move(transition.move_head)
