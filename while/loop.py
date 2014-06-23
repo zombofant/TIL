@@ -4,6 +4,7 @@ import abc
 import collections
 import logging
 import re
+import operator
 
 syntax_var_assignment = re.compile(
     r"^x_?([0-9]+)\s*:=\s*x_?([0-9]+)(\s*([+-])\s*([0-9]+))?$")
@@ -12,6 +13,8 @@ syntax_loop = re.compile(r"^LOOP\s+x_?([0-9]+)\s+DO$")
 syntax_while = re.compile(r"^WHILE\s+x_?([0-9]+)\s*(≠|!=)\s*0\s+DO$")
 syntax_end = re.compile(r"^END$")
 syntax_comment = re.compile(r"#.*$")
+syntax_add_assignment = re.compile(
+    r"^x_?([0-9]+)\s*:=\s*x_?([0-9]+)\s*([+-])\s*x_?([0-9]+)$")
 
 class VM(object):
     def __init__(self, *args):
@@ -175,6 +178,54 @@ class VarAssignment(Node):
             "+" if self._offset >= 0 else "-",
             abs(self._offset))
 
+class AddAssignment(Node):
+    @classmethod
+    def parse(cls, line):
+        m = syntax_add_assignment.match(line)
+        if not m:
+            return None
+
+        groups = m.groups()
+        destindex = int(groups[0])
+        src1index = int(groups[1])
+        src2index = int(groups[3])
+        op = groups[2]
+
+        return cls(destindex, src1index, op, src2index)
+
+    def __init__(self, destindex, src1index, op, src2index):
+        super(AddAssignment, self).__init__()
+        self._destindex = destindex
+        self._src1index = src1index
+        self._op = op
+        self._src2index = src2index
+
+    def run(self, vm):
+        op = operator.sub if self._op == '-' else operator.add
+        s1_value = vm.get(self._src1index)
+        s2_value = vm.get(self._src2index)
+        new_value = max(op(s1_value, s2_value), 0)
+        self._logger.debug(
+            "x%d := x%d %s x%d  # x%d = %d, x%d := %d, x%d := %d",
+            self._destindex,
+            self._src1index,
+            self._op,
+            self._src2index,
+            self._src1index,
+            s1_value,
+            self._src2index,
+            s2_value,
+            self._destindex,
+            new_value)
+        vm.set(self._destindex, new_value)
+
+    def to_string(self, indent=""):
+        return indent+"x{} := x{} {} x{}".format(
+            self._destindex,
+            self._src1index,
+            self._op,
+            self._src2index)
+
 class ConstAssignment(Node):
     @classmethod
     def parse(cls, line):
@@ -205,12 +256,14 @@ class ConstAssignment(Node):
             self._destindex,
             self._value)
 
-def parse(s, whilep=False):
+def parse(s, whilep=False, add_assignment=False):
     node_types = [
         Loop, VarAssignment, ConstAssignment
     ]
     if whilep:
         node_types.append(While)
+    if add_assignment:
+        node_types.insert(0, AddAssignment)
 
     node_stack = []
     node = Program()
@@ -261,12 +314,6 @@ if __name__ == "__main__":
         description="""Parse and interpret a LOOP or WHILE program, working in
         the space of natural numbers (including 0).""")
     parser.add_argument(
-        "-f", "--infile",
-        metavar="FILE",
-        help="File containing the LOOP program to run. Omit to use STDIN.",
-        type=argparse.FileType("r"),
-        default=sys.stdin)
-    parser.add_argument(
         "-d", "--dump",
         action="store_true",
         default=False,
@@ -290,9 +337,23 @@ if __name__ == "__main__":
         dest="whilep",
         action="store_true",
         default=False,
-        help="Interpret the input as WHILE program, instead of LOOP.")
+        help="Interpret the input as WHILE program, instead of LOOP (same as -fwhile).")
+    parser.add_argument(
+        "-f",
+        dest="features",
+        action="append",
+        default=[],
+        help="Enable optional features")
+    parser.add_argument(
+        "infile",
+        nargs="?",
+        metavar="FILE",
+        help="File containing the LOOP program to run. Omit to use STDIN.",
+        type=argparse.FileType("r"),
+        default=sys.stdin)
 
     args = parser.parse_args()
+    args.features = set(args.features)
 
     level = {
         0: logging.ERROR,
@@ -306,11 +367,27 @@ if __name__ == "__main__":
         format='{0}:%(levelname)-8s %(message)s'.format(
             os.path.basename(sys.argv[0])))
 
+    try:
+        args.features.remove("while")
+        whilep = True
+    except KeyError:
+        whilep = False
+
+    try:
+        args.features.remove("add-assignment")
+        add_assignment = True
+    except KeyError:
+        add_assignment = False
+
+    if args.features:
+        raise ValueError("Unsupported features: {}".format(
+            ", ".join(args.features)))
 
     try:
         program = parse(
             args.infile.read(),
-            whilep=args.whilep)
+            whilep=whilep,
+            add_assignment=add_assignment)
     finally:
         if args.infile is not sys.stdin:
             args.infile.close()
