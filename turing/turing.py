@@ -8,7 +8,9 @@ Transition = collections.namedtuple("Transition", ["wchar", "move_head",
 
 
 class Tape(collections.defaultdict):
-    def __init__(self, data, blank, loglevel=logging.WARNING):
+    logger = logging.getLogger(__qualname__)
+
+    def __init__(self, data, blank):
         super().__init__(lambda: blank)
 
         if not data:
@@ -19,11 +21,6 @@ class Tape(collections.defaultdict):
 
         self.pos = 0
         self.blank = blank
-
-        logging.basicConfig(format='[{name}] [{levelname}] {message}',
-                            style="{", level=loglevel)
-
-        self.logger = logging.getLogger(self.__class__.__name__)
 
     def __str__(self):
         upper = max(max(self), self.pos)
@@ -67,10 +64,12 @@ class Tape(collections.defaultdict):
 
 
 class TuringMachine:
-    def __init__(self, tape, transitions, initial_state, accepting_states,
-                 blank="b̸", outputs=1, loglevel=logging.WARNING):
+    logger = logging.getLogger(__qualname__)
 
-        self.tape = Tape(tape, blank=blank, loglevel=loglevel)
+    def __init__(self, tape, transitions, initial_state, accepting_states,
+                 blank="b̸", outputs=1):
+
+        self.tape = Tape(tape, blank=blank)
 
         self._state = None
         self.states = set()
@@ -85,11 +84,6 @@ class TuringMachine:
                 new_state)
 
         self.outputs = outputs
-
-        logging.basicConfig(format='[{name}] [{levelname}] {message}',
-                            style="{", level=loglevel)
-
-        self.logger = logging.getLogger(self.__class__.__name__)
 
         self.logger.info("machine initialized. current state: {} {}".format(
             self.state, self.tape))

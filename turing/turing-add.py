@@ -15,7 +15,7 @@ def pos_int(val):
 
     return val
 
-    
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("a", type=pos_int)
@@ -25,8 +25,10 @@ parser.add_argument("-v", "--verbosity", action="count",
 
 args = parser.parse_args()
 loglevel = {0: logging.WARNING,
-            1: logging.INFO,
-            2: logging.DEBUG}.get(args.verbosity)
+            1: logging.INFO}.get(args.verbosity, logging.DEBUG)
+
+logging.basicConfig(format='[{name}] [{levelname}] {message}',
+                    style="{", level=loglevel)
 
 
 a = "a"
@@ -54,7 +56,7 @@ transitions = {(q0, a, a, 1, q0),
                (q5, a, a, -1, q5),
                (q5, blank, blank, 1, qf)}
 
-machine = TuringMachine(tape, transitions, q0, {qf}, loglevel=loglevel)
+machine = TuringMachine(tape, transitions, q0, {qf})
 machine.run()
 output = machine.output()
 print(len(output[0]))
