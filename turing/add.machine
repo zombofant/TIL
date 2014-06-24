@@ -1,0 +1,19 @@
+type: DTM function
+input: unary natural, unary natural
+output: unary natural
+start: q0
+
+(q0, a, a, r, q0),
+(q0, blank, blank, r, q1),
+(q1, a, a, r, q2),
+(q1, blank, blank, n, q2),
+(q2, blank, blank, l, q3),
+(q2, a, a, r, q2),
+(q3, a, blank, l, q4),
+(q3, blank, blank, l, q5),
+(q4, a, a, l, q4),
+(q4, blank, a, l, q5),
+(q5, a, a, l, q5),
+(q5, blank, blank, r, qf)
+
+final: qf
