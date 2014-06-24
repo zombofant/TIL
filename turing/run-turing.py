@@ -313,9 +313,6 @@ if __name__ == "__main__":
         level=loglevel
     )
 
-    if len(args.blank) != 1:
-        raise ValueError("Blank must have a length of exactly 1")
-
     with open(args.infile, "r") as f:
         lines = f.readlines()
 
