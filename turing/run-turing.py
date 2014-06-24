@@ -332,7 +332,7 @@ if __name__ == "__main__":
 
     initial_tape = []
     for arg, inputtype in zip(args.args, input_signature):
-        initial_tape.append(inputtype.to_turing_input(arg))
+        initial_tape += list(inputtype.to_turing_input(arg))
         initial_tape.append(args.blank)
 
     machine = turing.TuringMachine(
